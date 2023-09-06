@@ -41,5 +41,17 @@ class StepTable(Base):
     recipeId= Column(Integer , ForeignKey('recipes.id'))
 
     def __repr__(self):
-        return f"Ingredient(id={self.id!r}, description={self.description},  steporder= {self.steporder}, recipeId={self.recipeId})"
+        return f"StepTable(id={self.id!r}, description={self.description},  steporder= {self.steporder}, recipeId={self.recipeId})"
+    
+
+class Category(Base):
+    __tablename__='foodcategories'
+
+    id= Column(Integer, primary_key=True)
+    name= Column(String)
+    recipeId= Column(Integer , ForeignKey('recipes.id'))
+
+    def __repr__(self):
+        return f"Category(id={self.id!r}, name={self.name}, recipeId={self.recipeId})"
+
 
