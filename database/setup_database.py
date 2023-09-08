@@ -1,9 +1,3 @@
-# import sqlite3
-
-# conn = sqlite3.connect('sqlite:///ourrecipes.db')
-# conn.close()
-
-# setup_database.py
 import sqlite3
 
 def create_database():

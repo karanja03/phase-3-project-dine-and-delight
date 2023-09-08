@@ -14,12 +14,10 @@ class Recipe(Base):
     name =Column (String())
     description= Column(String())
 
-
-
     def __repr__(self):
         return f"Recipe(id={self.id!r}, name={self.name!r}, description={self.description!r})"
+    
     ingredients = relationship('RecipeIngredient', back_populates='recipe')
-    # categories = relationship('RecipeCategory', back_populates='recipe')
     categories = relationship('RecipeCategory', back_populates='recipe', cascade='all, delete-orphan')
     recipe_ingredients = relationship("RecipeIngredient", back_populates="recipe", overlaps="ingredients")
 
@@ -45,7 +43,6 @@ class Category(Base):
     name= Column(String)
     recipeId= Column(Integer , ForeignKey('recipes.id'))
 
-    # recipes = relationship('RecipeCategory', back_populates='category')
     recipes = relationship('RecipeCategory', back_populates='category', cascade='all, delete-orphan')
     def __repr__(self):
         return f"Category(id={self.id!r}, name={self.name}, recipeId={self.recipeId})"

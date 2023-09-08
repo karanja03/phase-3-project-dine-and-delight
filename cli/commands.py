@@ -2,8 +2,8 @@
 
 import click
 from database.model import Recipe, Ingredient, Category, RecipeIngredient, RecipeCategory
-# from sqlalchemy.orm import session
 from database.db import session
+from sqlalchemy.orm import joinedload
 
 @click.group()
 
@@ -24,6 +24,7 @@ def add_recipe():
     session.commit()
 
     click.echo(f"Recipe '{recipe.name}' added successfully!!")
+
 
 @main.command()
 
@@ -57,6 +58,8 @@ def add_ingredients():
     else:
         click.echo(f"Recipe '{recipe_name}' not found. Please check the recipe name and try again.")
 
+
+
 #  adding categories
 @main.command()
 def add_category():
@@ -67,7 +70,8 @@ def add_category():
 
     session.add(category)
     session.commit()
-    click.echo(f"{category} added successfully")
+    click.echo(f"{category.name} added successfully")
+
 
 
 @main.command()
@@ -107,6 +111,7 @@ def add_category_to_recipe():
         # displaying all the ingredients availabe
 
 @main.command()
+
 def list_recipes():
     """LIST ALL RECIPES AND THEIR DETAILS"""
 
@@ -126,6 +131,8 @@ def list_recipes():
 
 
 # dipslaying ingredients for specific recipes
+
+
 @main.command()
 
 def display_ingredients():
@@ -169,24 +176,6 @@ def update_recipe():
     else:
         click.echo(f"Recipe '{recipe_name}' not found. Please check the recipe name and try again.")
 
-# @main.command()
-# def delete_recipe():
-#     """DELETE A CERTAIN RECIPE."""
-#     recipe_name = click.prompt("Enter the name of the recipe to delete")
-
-#     # Retrieve the recipe with the given name
-#     recipe = session.query(Recipe).filter_by(name=recipe_name).first()
-
-#     if recipe:
-#         # Remove the recipe from associated categories
-#         for category in recipe.categories:
-#             category.recipes.remove(recipe)
-
-#         session.delete(recipe)
-#         session.commit()
-#         click.echo(f"Recipe '{recipe_name}' deleted successfully!")
-#     else:
-#         click.echo(f"Recipe '{recipe_name}' not found. Please check the recipe name and try again.")
 @main.command()
 
 def delete_recipe():
