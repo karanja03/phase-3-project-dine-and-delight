@@ -2,12 +2,13 @@
 
 import click
 from database.model import Recipe, Ingredient, Category, RecipeIngredient, RecipeCategory
+# from sqlalchemy.orm import session
 from database.db import session
 
 @click.group()
 
 def main():
-    """WELCOME TO DIne AND DELIGHT CLI APP"""
+    """WELCOME TO DINE AND DELIGHT CLI APP"""
     pass
 
 
@@ -17,9 +18,8 @@ def add_recipe():
 
     name = click.prompt("Enter the name of the recipe")
     description = click.prompt("Enter the description")
-    cooking_time = click.prompt("Enter the cooking time")
 
-    recipe = Recipe(name=name, description=description, cooking_time=cooking_time)
+    recipe = Recipe(name=name, description=description)
     session.add(recipe)
     session.commit()
 
@@ -67,6 +67,7 @@ def add_category():
 
     session.add(category)
     session.commit()
+    click.echo(f"{category} added successfully")
 
 
 @main.command()
@@ -94,9 +95,13 @@ def add_category_to_recipe():
     if not recipe or not category:
         click.echo(" Please Enter the Right Category and Recipe")
     else:
-        recipe.categories.append(category)
+        recipe_category = RecipeCategory(recipe=recipe, category=category)
+        session.add(recipe_category)
+        recipe.categories.append(recipe_category)
+        category.recipes.append(recipe_category)
         session.commit()
         click.echo(f"Category '{category.name}' added to recipe '{recipe.name}'.")
+
 
 
         # displaying all the ingredients availabe
@@ -116,7 +121,6 @@ def list_recipes():
         for recipe in recipes:
             click.echo(f"Name: {recipe.name}")
             click.echo(f"Description: {recipe.description}")
-            click.echo(f"Cooking Time: {recipe.cooking_time} minutes")
 
 
 
@@ -127,13 +131,14 @@ def list_recipes():
 def display_ingredients():
     """DISPLAYING INGREDIENTS OF A SPECIFIC RECIPE"""
 
-    recipe_name= click.echo("Enter  recipe name to find ingredients")
+    recipe_name= click.prompt("Enter  recipe name to find ingredients:")
 
     recipe=session.query(Recipe).filter_by(name=recipe_name).first()
 
     if recipe:
         click.echo(f"Ingredients for '{recipe.name}' are : ")
-        for ingredient in recipe.ingredients:
+        for recipe_ingredient in recipe.recipe_ingredients:
+            ingredient = recipe_ingredient.ingredient
             click.echo(f"- {ingredient.name}: {ingredient.quantity} , {ingredient.units}")
     else:
         click.echo(f"Recipe '{recipe_name}' not found. Please check the recipe name and try again.")
@@ -164,25 +169,57 @@ def update_recipe():
     else:
         click.echo(f"Recipe '{recipe_name}' not found. Please check the recipe name and try again.")
 
+# @main.command()
+# def delete_recipe():
+#     """DELETE A CERTAIN RECIPE."""
+#     recipe_name = click.prompt("Enter the name of the recipe to delete")
+
+#     # Retrieve the recipe with the given name
+#     recipe = session.query(Recipe).filter_by(name=recipe_name).first()
+
+#     if recipe:
+#         # Remove the recipe from associated categories
+#         for category in recipe.categories:
+#             category.recipes.remove(recipe)
+
+#         session.delete(recipe)
+#         session.commit()
+#         click.echo(f"Recipe '{recipe_name}' deleted successfully!")
+#     else:
+#         click.echo(f"Recipe '{recipe_name}' not found. Please check the recipe name and try again.")
 @main.command()
+
 def delete_recipe():
-    """DELETE A CERTAIN RECIPE."""
+    """DELETE A RECIPE"""
+
     recipe_name = click.prompt("Enter the name of the recipe to delete")
 
-    # Retrieve the recipe with the given name
+    # Find the recipe by name
     recipe = session.query(Recipe).filter_by(name=recipe_name).first()
 
-    if recipe:
-        # Remove the recipe from associated categories
-        for category in recipe.categories:
-            category.recipes.remove(recipe)
-
-        session.delete(recipe)
-        session.commit()
-        click.echo(f"Recipe '{recipe_name}' deleted successfully!")
-    else:
+    if not recipe:
         click.echo(f"Recipe '{recipe_name}' not found. Please check the recipe name and try again.")
+    else:
+        try:
+            # Find and remove all related entries in recipe_ingredient
+            recipe_ingredients = session.query(RecipeIngredient).filter_by(recipe_id=recipe.id).all()
+            for recipe_ingredient in recipe_ingredients:
+                session.delete(recipe_ingredient)
 
+            # Find the RecipeCategory linking the recipe to a category
+            recipe_category = session.query(RecipeCategory).filter_by(recipe_id=recipe.id).first()
+
+            if recipe_category:
+                # Remove the RecipeCategory object (unlink the recipe from the category)
+                session.delete(recipe_category)
+
+            # Delete the recipe itself
+            session.delete(recipe)
+            session.commit()
+            click.echo(f"Recipe '{recipe.name}' deleted successfully.")
+        except Exception as e:
+            session.rollback()
+            click.echo(f"An error occurred while deleting the recipe: {str(e)}")
 
 
 if __name__=="__main__":
