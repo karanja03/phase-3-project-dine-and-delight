@@ -2,6 +2,17 @@
 
 Welcome to the Dine and Delight CLI app! This app allows you to manage your recipes, ingredients, and categories all from the command line. Whether you're a home cook or a professional chef, this app can help you organize and keep track of your culinary creations.
 
+
+
+## Features
+1. Add an new recipe
+2. List all recipes
+3. Add ingredients
+4. Display Ingredients
+5. List Categories
+6. Add Category to recipe
+7. Update Recipe
+
 ## GETTING STARTED
 
 ## PREREQUISITIES
